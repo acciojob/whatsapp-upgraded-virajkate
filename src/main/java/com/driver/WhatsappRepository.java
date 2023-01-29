@@ -5,16 +5,16 @@ import java.util.*;
 public class WhatsappRepository {
     //Assume that each user belongs to at most one group
     //You can use the below mentioned hashmaps or delete these and create your own.
-    private HashMap<Group, List<User>> groupUserMap;
-    private HashMap<Group, List<Message>> groupMessageMap;
+    private HashMap<Group, List<User>> groupuserMap;
+    private HashMap<Group, List<Message>> groupmessMap;
     private HashMap<Message, User> senderMap;
     private HashMap<Group, User> adminMap;
     private HashSet<String> userMobile;
     private int customGroupCount;
     private int messageId;
     public WhatsappRepository(){
-        this.groupMessageMap = new HashMap<Group, List<Message>>();
-        this.groupUserMap = new HashMap<Group, List<User>>();
+        this.groupmessMap = new HashMap<Group, List<Message>>();
+        this.groupuserMap = new HashMap<Group, List<User>>();
         this.senderMap = new HashMap<Message, User>();
         this.adminMap = new HashMap<Group, User>();
         this.userMobile = new HashSet<>();
@@ -39,15 +39,15 @@ public class WhatsappRepository {
         if(users.size()==2){
             Group group = new Group(users.get(1).getName(), 2);
             adminMap.put(group, users.get(0));
-            groupUserMap.put(group, users);
-            groupMessageMap.put(group, new ArrayList<Message>());
+            groupuserMap.put(group, users);
+            groupmessMap.put(group, new ArrayList<Message>());
             return group;
         }
         this.customGroupCount += 1;
         Group group = new Group(new String("Group "+this.customGroupCount), users.size());
         adminMap.put(group, users.get(0));
-        groupUserMap.put(group, users);
-        groupMessageMap.put(group, new ArrayList<Message>());
+        groupuserMap.put(group, users);
+        groupmessMap.put(group, new ArrayList<Message>());
         return group;
     }
     public int createMessage(String content){
@@ -62,7 +62,7 @@ public class WhatsappRepository {
         //Throw "You are not allowed to send message" if the sender is not a member of the group
         //If the message is sent successfully, return the final number of messages in that group.
         if(adminMap.containsKey(group)){
-            List<User> users = groupUserMap.get(group);
+            List<User> users = groupuserMap.get(group);
             Boolean userFound = false;
             for(User user: users){
                 if(user.equals(sender)){
@@ -72,9 +72,9 @@ public class WhatsappRepository {
             }
             if(userFound){
                 senderMap.put(message, sender);
-                List<Message> messages = groupMessageMap.get(group);
+                List<Message> messages = groupmessMap.get(group);
                 messages.add(message);
-                groupMessageMap.put(group, messages);
+                groupmessMap.put(group, messages);
                 return messages.size();
             }
             throw new Exception("You are not allowed to send message");
@@ -89,7 +89,7 @@ public class WhatsappRepository {
 
         if(adminMap.containsKey(group)){
             if(adminMap.get(group).equals(approver)){
-                List<User> participants = groupUserMap.get(group);
+                List<User> participants = groupuserMap.get(group);
                 Boolean userFound = false;
                 for(User participant: participants){
                     if(participant.equals(user)){
@@ -114,8 +114,8 @@ public class WhatsappRepository {
         //If user is removed successfully, return (the updated number of users in the group + the updated number of messages in group + the updated number of overall messages)
         Boolean userFound = false;
         Group userGroup = null;
-        for(Group group: groupUserMap.keySet()){
-            List<User> participants = groupUserMap.get(group);
+        for(Group group: groupuserMap.keySet()){
+            List<User> participants = groupuserMap.get(group);
             for(User participant: participants){
                 if(participant.equals(user)){
                     if(adminMap.get(group).equals(user)){
@@ -131,23 +131,23 @@ public class WhatsappRepository {
             }
         }
         if(userFound){
-            List<User> users = groupUserMap.get(userGroup);
+            List<User> users = groupuserMap.get(userGroup);
             List<User> updatedUsers = new ArrayList<>();
             for(User participant: users){
                 if(participant.equals(user))
                     continue;
                 updatedUsers.add(participant);
             }
-            groupUserMap.put(userGroup, updatedUsers);
+            groupuserMap.put(userGroup, updatedUsers);
 
-            List<Message> messages = groupMessageMap.get(userGroup);
+            List<Message> messages = groupmessMap.get(userGroup);
             List<Message> updatedMessages = new ArrayList<>();
             for(Message message: messages){
                 if(senderMap.get(message).equals(user))
                     continue;
                 updatedMessages.add(message);
             }
-            groupMessageMap.put(userGroup, updatedMessages);
+            groupmessMap.put(userGroup, updatedMessages);
 
             HashMap<Message, User> updatedSenderMap = new HashMap<>();
             for(Message message: senderMap.keySet()){
@@ -165,8 +165,8 @@ public class WhatsappRepository {
         // Find the Kth latest message between start and end (excluding start and end)
         // If the number of messages between given time is less than K, throw "K is greater than the number of messages" exception
         List<Message> messages = new ArrayList<>();
-        for(Group group: groupMessageMap.keySet()){
-            messages.addAll(groupMessageMap.get(group));
+        for(Group group: groupmessMap.keySet()){
+            messages.addAll(groupmessMap.get(group));
         }
         List<Message> filteredMessages = new ArrayList<>();
         for(Message message: messages){
