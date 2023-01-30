@@ -30,7 +30,7 @@ public class WhatsappService {
         //Throw "Group does not exist" if the mentioned group does not exist
         //Throw "You are not allowed to send message" if the sender is not a member of the group
 
-        return  whatsappRepository.sendMessage(message, sender, group);
+        return whatsappRepository.sendMessageInGroup(message,sender,group);
     }
 
     public String changeAdmin(User approver, User user, Group group) throws Exception{
